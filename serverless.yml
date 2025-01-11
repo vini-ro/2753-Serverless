@@ -1,0 +1,34 @@
+org: vroliveira
+app: alura-serverless
+service: alura-serverless
+frameworkVersion: '4'
+
+params:
+  default:
+    dbName: alura-serverless
+  dev:
+    connectionString: mongodb://localhost:27017/${self:params.default.dbName}
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  environment:
+    MONGODB_CONNECTIONSTRING: ${param:connectionString}
+    MONGODB_DB_NAME: ${param:dbName}
+
+functions:
+  sendResponse:
+    handler: api/handlers.sendResponse
+    events:
+      - httpApi:
+          path: /api/results
+          method: post
+  getResult:
+    handler: api/handlers.getResult
+    events:
+      - httpApi:
+          path: /api/results/{id}
+          method: get
+
+plugins:
+  - serverless-offline
