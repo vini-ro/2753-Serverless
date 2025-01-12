@@ -11,7 +11,7 @@ params:
 
 provider:
   name: aws
-  runtime: nodejs14.x
+  runtime: nodejs20.x
   environment:
     MONGODB_CONNECTIONSTRING: ${param:connectionString}
     MONGODB_DB_NAME: ${param:dbName}
