@@ -58,7 +58,7 @@ module.exports.getResult = async (event) => {
   const collection = await client.collection('results')
 
   const result = await collection.findOne({
-      _id: new ObjectId(event.pathParameters.id)
+      _id: ObjectId.createFromHexString(event.pathParameters.id)
   })
 
   if (!result) {

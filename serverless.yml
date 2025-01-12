@@ -8,6 +8,8 @@ params:
     dbName: alura-serverless
   dev:
     connectionString: mongodb://localhost:27017/${self:params.default.dbName}
+  prod:
+    connectionString: mongodb+srv://admin:admin123@cluster0.yyoob.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
 
 provider:
   name: aws
