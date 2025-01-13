@@ -29,7 +29,7 @@ async function saveResultToDatabase(result) {
 async function getResultById(id) {
   const client = await connectToDatabase()
   const collection = client.collection('results')
-  const result = await collection.findOne({ _id: new ObjectId(id) })
+  const result = await collection.findOne({ _id: new ObjectId(String(id)) })
   if (!result) return null
   return result
 }

@@ -49,7 +49,7 @@ functions:
           method: post
           request:
             schemas:
-              'application/json': ${file(./api/schemas/login.json)}
+              'application/json': ${file(./schemas/login.json)}
 
 plugins:
   - serverless-offline
