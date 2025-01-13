@@ -28,7 +28,7 @@ $('form').addEventListener('submit', async (e) => {
     data.answers[Number(answer.name) - 1] = Number(answer.value)
   })
 
-  const response = await fetch('https://kf5oys9zn9.execute-api.us-east-1.amazonaws.com/api/results', {
+  const response = await fetch('https://65able222k.execute-api.us-east-1.amazonaws.com/api/results', {
     method: 'POST',
     body: JSON.stringify(data),
     headers: {

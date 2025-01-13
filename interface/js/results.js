@@ -12,7 +12,7 @@ const bail = () => {
 
 if (!resultId) bail()
 
-fetch(`https://kf5oys9zn9.execute-api.us-east-1.amazonaws.com/api/results/${resultId}`, {
+fetch(`https://65able222k.execute-api.us-east-1.amazonaws.com/api/results/${resultId}`, {
   headers: {
     Authorization: `Bearer ${window.localStorage.getItem('token')}`
   }

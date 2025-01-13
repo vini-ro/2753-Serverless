@@ -14,6 +14,8 @@ params:
     connectionString: mongodb+srv://admin:admin123@cluster0.yyoob.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
 
 provider:
+  httpApi:
+    cors: true
   name: aws
   runtime: nodejs20.x
   environment:
@@ -49,7 +51,7 @@ functions:
           method: post
           request:
             schemas:
-              'application/json': ${file(./schemas/login.json)}
+              application/json: ${file(./schemas/login.json)}
 
 plugins:
   - serverless-offline
