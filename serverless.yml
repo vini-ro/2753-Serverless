@@ -9,6 +9,7 @@ params:
   dev:
     connectionString: mongodb://localhost:27017/${self:params.default.dbName}
     salt: P3bKgaMWoRRpNBEeFGQbeA79pIoMsohp
+    jwtSecret: ZaywZRf6omss9DlR8KSHKj3MatQBf7vuM7Qx0vPrVieG2kRoiX2ye99J0J9RV2UU
   prod:
     connectionString: mongodb+srv://admin:admin123@cluster0.yyoob.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
 
@@ -18,7 +19,9 @@ provider:
   environment:
     MONGODB_CONNECTIONSTRING: ${param:connectionString}
     MONGODB_DB_NAME: ${param:dbName}
+    JWT_SECRET: ${param:jwtSecret}
     SALT: ${param:salt}
+
 
 functions:
   sendResponse:
@@ -27,12 +30,26 @@ functions:
       - httpApi:
           path: /api/results
           method: post
+          # Validação de schema para o body da requisição
+          # request:
+            # schemas:
+              # application/json: ${file(./schemas/sendResponse.json)}
   getResult:
     handler: api/handlers.getResult
     events:
       - httpApi:
           path: /api/results/{id}
           method: get
+
+  login:
+    handler: api/handlers.login
+    events:
+      - httpApi:
+          path: /api/login
+          method: post
+          request:
+            schemas:
+              'application/json': ${file(./schemas/login.json)}
 
 plugins:
   - serverless-offline
