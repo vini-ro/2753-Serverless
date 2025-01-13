@@ -1,5 +1,5 @@
 const { verify, sign } = require('jsonwebtoken')
-const { buildResponse } = require('./utils')
+const { buildResponse } = require('./util')
 const { pbkdf2Sync } = require('crypto')
 
 function createToken(username, id) {

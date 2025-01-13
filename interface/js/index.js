@@ -1,5 +1,10 @@
 const $ = document.querySelector.bind(document)
 
+if (!window.localStorage.getItem('token')) {
+  console.log("entrou no if");
+  window.location.href = '/login.html'
+}
+
 $('form').addEventListener('submit', async (e) => {
   e.preventDefault()
   const data = {
@@ -23,11 +28,12 @@ $('form').addEventListener('submit', async (e) => {
     data.answers[Number(answer.name) - 1] = Number(answer.value)
   })
 
-  const response = await fetch('/api/results', {
+  const response = await fetch('https://kf5oys9zn9.execute-api.us-east-1.amazonaws.com/api/results', {
     method: 'POST',
     body: JSON.stringify(data),
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${window.localStorage.getItem('token')}`
     }
   })
 
