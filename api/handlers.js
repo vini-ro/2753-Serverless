@@ -1,20 +1,23 @@
 'use strict';
 const { MongoClient, ObjectId } = require('mongodb');
-const { pbkd2Sync } = require('crypto');
+const { pbkdf2Sync } = require('crypto');
 
+let connectionInstance = null;
 async function connectToDatabase() {
-    const client = new MongoClient(process.env.MONGODB_CONNECTIONSTRING)
-    const connection = await client.connect()
-    return connection.db(process.env.MONGODB_DB_NAME)
+  if (connectionInstance) return connectionInstance;
+  const client = new MongoClient(process.env.MONGODB_CONNECTIONSTRING);
+  const connection = await client.connect();
+  connectionInstance = connection.db(process.env.MONGODB_DB_NAME);
+  return connectionInstance;
 }
 
 async function basicAuth(event) {
-  const{authorization} = event.headers;
+  const { authorization } = event.headers;
   if (!authorization) {
     return {
       statusCode: 401,
       body: JSON.stringify({ error: 'Missing authorization header' }),
-    }
+    };
   }
 
   const [type, credentials] = authorization.split(' ');
@@ -22,33 +25,39 @@ async function basicAuth(event) {
     return {
       statusCode: 401,
       body: JSON.stringify({ error: 'Unsupported authorization type' }),
-    }
+    };
   }
 
-  const [username, password] = Buffer.from(credentials, 'base64').toString('utf-8').split(':');
-  const hashedPass = pbkd2Sync(password, process.env.SALT, 100000, 64, 'sha512').toString('hex');
+  const [username, password] = Buffer.from(credentials, 'base64')
+    .toString('utf-8')
+    .split(':');
+  const hashedPass = pbkdf2Sync(
+    password,
+    process.env.SALT,
+    100000,
+    64,
+    'sha512'
+  ).toString('hex');
 
-  const client = await connectToDatabase()
-  const collection = await client.collection('users')
+  const client = await connectToDatabase();
+  const collection = await client.collection('users');
   const user = await collection.findOne({
     name: username,
-    password: hashedPass
-  })
+    password: hashedPass,
+  });
 
   if (!user) {
     return {
       statusCode: 401,
       body: JSON.stringify({ error: 'Invalid credentials' }),
-    }
+    };
   }
 
   return {
     id: user._id,
-    username: user.username
-  }
+    username: user.username,
+  };
 }
-
-
 
 function extractBody(event) {
   if (!event?.body) {
@@ -60,9 +69,16 @@ function extractBody(event) {
   return JSON.parse(event.body);
 }
 
+function sendResponse(statusCode, body) {
+  return {
+    statusCode,
+    body: JSON.stringify(body),
+  };
+}
+
 module.exports.sendResponse = async (event) => {
   const authResult = await basicAuth(event);
-  if (authResult.statusCode == 401) return authResult;
+  if (authResult.statusCode === 401) return authResult;
 
   const { name, answers } = extractBody(event);
   const correctQuestions = [3, 1, 0, 2];
@@ -75,54 +91,42 @@ module.exports.sendResponse = async (event) => {
 
   const result = {
     name,
-    answers,
     totalCorrectAnswers,
-    totalAnswers: answers.length
-}
+    totalAnswers: answers.length,
+  };
 
-const client = await connectToDatabase()
-const collection = await client.collection('results')
-const { insertedId } = await collection.insertOne(result)
+  const client = await connectToDatabase();
+  const collection = await client.collection('results');
+  const { insertedId } = await collection.insertOne(result);
 
-return {
-    statusCode: 201,
-    body: JSON.stringify({
-      resultId: insertedId,
-      __hypermedia: {
-        href: `/results.html`,
-        query: { id: insertedId }
-      }
-    }),
-    headers: {
-      'Content-Type': 'application/json'
+  return sendResponse(201, {
+    resultId: insertedId,
+    __hypermedia: {
+      href: `/results.html`,
+      query: { id: insertedId },
     },
+  });
+};
+
+async function getResult(event) {
+  const authResult = await basicAuth(event);
+  if (authResult.statusCode && authResult.statusCode !== 200) {
+    return authResult;
   }
-}
 
-module.exports.getResult = async (event) => {
-  if (authResult.statusCode == 401) return authResult;
-
-  const client = await connectToDatabase()
-  const collection = await client.collection('results')
-
+  const client = await connectToDatabase();
+  const collection = await client.collection('results');
   const result = await collection.findOne({
-      _id: ObjectId.createFromHexString(event.pathParameters.id)
-  })
+    _id: new ObjectId(event.pathParameters.id),
+  });
 
   if (!result) {
-      return {
-          statusCode: 404,
-          body: JSON.stringify({ error: 'Result not found' }),
-          headers: {
-              'Content-Type': 'application/json'
-          }
-      }
+    return sendResponse(404, { error: 'Result not found' });
   }
-  return {
-      statusCode: 200,
-      headers: {
-          'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(result)
-  }
+
+  return sendResponse(200, result);
 }
+
+module.exports = {
+  getResult,
+};
