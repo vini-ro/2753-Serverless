@@ -8,6 +8,7 @@ params:
     dbName: alura-serverless
   dev:
     connectionString: mongodb://localhost:27017/${self:params.default.dbName}
+    salt: P3bKgaMWoRRpNBEeFGQbeA79pIoMsohp
   prod:
     connectionString: mongodb+srv://admin:admin123@cluster0.yyoob.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
 
@@ -17,6 +18,7 @@ provider:
   environment:
     MONGODB_CONNECTIONSTRING: ${param:connectionString}
     MONGODB_DB_NAME: ${param:dbName}
+    SALT: ${param:salt}
 
 functions:
   sendResponse:
