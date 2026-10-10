@@ -8,10 +8,10 @@ params:
     dbName: alura-serverless
   dev:
     connectionString: mongodb://localhost:27017/${self:params.default.dbName}
-    salt: P3bKgaMWoRRpNBEeFGQbeA79pIoMsohp
-    jwtSecret: ZaywZRf6omss9DlR8KSHKj3MatQBf7vuM7Qx0vPrVieG2kRoiX2ye99J0J9RV2UU
+    salt: ${env:SALT}
+    jwtSecret: ${env:JWT_SECRET}
   prod:
-    connectionString: mongodb+srv://admin:admin123@cluster0.yyoob.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+    connectionString: ${env:MONGODB_CONNECTIONSTRING}
 
 provider:
   httpApi:
